@@ -1,22 +1,16 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
-require('dotenv').config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb"); // Import ObjectId from the mongodb library
+require("dotenv").config();
 
-// middleware 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.llbekq4.mongodb.net/?retryWrites=true&w=majority`;
 
-
-
-
-const uri =
-  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.llbekq4.mongodb.net/?retryWrites=true&w=majority`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -27,25 +21,70 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
+    const foodCollection = client.db("foodShare").collection("availablefood");
+
+    const requestCollection = client.db("foodShare").collection("requestedfood");
+
+
+    app.get("/requested", async (req, res) => {
+      const request = requestCollection.find();
+      const result = await request.toArray();
+      res.send(result);
+    });
+    app.post('/requested', async (req, res) => {
+      const newRequest = req.body;
+      const result = await requestCollection.insertOne(newRequest);
+      res.send(result);
+    })
+
+    app.delete("/requested/:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+      const result = await requestCollection.deleteOne({ _id: objectId });
+      if (result.deletedCount === 1) {
+        res.send({ message: "Request canceled successfully" });
+      } else {
+        res.status(404).send({ error: "Request not found" });
+      }
+    });
+
+
+    app.get("/available", async (req, res) => {
+      const cursor = foodCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/available/:id", async (req, res) => {
+    const { id } = req.params;
+    const objectId = new ObjectId(id);
+        const foodItem = await foodCollection.findOne({ _id: objectId });
+        res.send(foodItem);
+    });
+
+    app.post("/available", async (req, res) => {
+      const addNew = req.body;
+      const result = await foodCollection.insertOne(addNew);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
+    // Ensure that the client will close when you finish/error
+    // await client.close();
   }
 }
+
 run().catch(console.dir);
 
-app.get('/', (req, res) => {
-    res.send('food share unity is running')
-})
+app.get("/", (req, res) => {
+  res.send("food share unity is running");
+});
 
 app.listen(port, () => {
-    console.log(`food share unity server is running on port ${port}`)
-})
-
+  console.log(`food share unity server is running on port ${port}`);
+});
