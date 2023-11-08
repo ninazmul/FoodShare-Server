@@ -78,6 +78,31 @@ app.get("/available", async (req, res) => {
       res.send(result);
     });
 
+    app.put('/available/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateFood = req.body;
+      const food = {
+        $set: {
+          foodName: updateFood.foodName,
+          pickupLocation: updateFood.pickupLocation,
+          expiredDate: updateFood.expiredDate,
+          foodImage: updateFood.foodImage,
+          displayName: updateFood.displayName,
+          requestDate: updateFood.requestDate,
+          email: updateFood.email,
+          donationAmount: updateFood.donationAmount,
+          additionalNotes: updateFood.additionalNotes,
+          foodQuantity: updateFood.foodQuantity,
+          photoURL: updateFood.photoURL,
+          available: updateFood.available,
+        },
+      }
+      const result = await foodCollection.updateOne(filter, food, options);
+      res.send(result);
+    })
+
     app.delete("/available/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
