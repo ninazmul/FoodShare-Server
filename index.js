@@ -2,10 +2,18 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb"); // Import ObjectId from the mongodb library
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+// const jwt = require("jsonwebtoken");
 
 // Middleware
+// app.use(cors({
+//   origin: [
+//     "https://foodshare-b19e2.web.app/",
+//     "https://foodshare-b19e2.firebaseapp.com/"
+//   ],
+//   credentials: true
+// }))
 app.use(cors());
 app.use(express.json());
 
