@@ -56,15 +56,14 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/available", async (req, res) => {
-      console.log(req.query.email);
-      let query = {};
-      if (req.query?.email) {
-        query={email: req.query.email}
-      }
-      const result = await foodCollection.find(query).toArray();
-      res.send(result);
-    });
+app.get("/available", async (req, res) => {
+  let query = {};
+  if (req.query.email) {
+    query = { email: req.query.email };
+  }
+  const result = await foodCollection.find(query).toArray();
+  res.send(result);
+});
 
     app.get("/available/:id", async (req, res) => {
     const { id } = req.params;
@@ -76,6 +75,13 @@ async function run() {
     app.post("/available", async (req, res) => {
       const addNew = req.body;
       const result = await foodCollection.insertOne(addNew);
+      res.send(result);
+    });
+
+    app.delete("/available/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await foodCollection.deleteOne(query);
       res.send(result);
     });
 
