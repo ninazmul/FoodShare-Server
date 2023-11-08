@@ -56,6 +56,16 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/available", async (req, res) => {
+      console.log(req.query.email);
+      let query = {};
+      if (req.query?.email) {
+        query={email: req.query.email}
+      }
+      const result = await foodCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/available/:id", async (req, res) => {
     const { id } = req.params;
     const objectId = new ObjectId(id);
